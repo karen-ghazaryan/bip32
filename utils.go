@@ -6,8 +6,8 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"errors"
-	"github.com/cmars/basen"
-	"github.com/mndrix/btcutil"
+	"github.com/FactomProject/basen"
+	"github.com/FactomProject/btcutilecc"
 	"io"
 	"math/big"
 )
