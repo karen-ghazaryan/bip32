@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"github.com/cmars/basen"
 	"github.com/mndrix/btcutil"
 	"io"
@@ -79,7 +80,12 @@ func addPrivateKeys(key1 []byte, key2 []byte) []byte {
 	key1Int.Add(&key1Int, &key2Int)
 	key1Int.Mod(&key1Int, curve.Params().N)
 
-	return key1Int.Bytes()
+	b := key1Int.Bytes()
+	if len(b) < 32 {
+		extra := make([]byte, 32-len(b))
+		b = append(extra, b...)
+	}
+	return b
 }
 
 func compressPublicKey(x *big.Int, y *big.Int) []byte {
@@ -125,8 +131,9 @@ func expandPublicKey(key []byte) (*big.Int, *big.Int) {
 }
 
 func validatePrivateKey(key []byte) error {
-	keyInt, _ := binary.ReadVarint(bytes.NewBuffer(key))
-	if keyInt == 0 || bytes.Compare(key, curveParams.N.Bytes()) >= 0 {
+	if fmt.Sprintf("%x", key) == "0000000000000000000000000000000000000000000000000000000000000000" || //if the key is zero
+		bytes.Compare(key, curveParams.N.Bytes()) >= 0 || //or is outside of the curve
+		len(key) != 32 { //or is too short
 		return errors.New("Invalid seed")
 	}
 
