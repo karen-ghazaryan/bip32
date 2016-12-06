@@ -2,13 +2,13 @@ package bip32
 
 import (
 	"bytes"
-	"code.google.com/p/go.crypto/ripemd160"
 	"crypto/sha256"
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/cmars/basen"
-	"github.com/mndrix/btcutil"
+	"github.com/FactomProject/basen"
+	"github.com/FactomProject/btcutilecc"
+	"golang.org/x/crypto/ripemd160"
 	"io"
 	"math/big"
 )

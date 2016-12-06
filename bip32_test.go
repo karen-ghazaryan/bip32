@@ -3,7 +3,7 @@ package bip32_test
 import (
 	"encoding/hex"
 	"github.com/stretchr/testify/assert"
-	"github.com/tyler-smith/go-bip32"
+	"github.com/FactomProject/go-bip32"
 	"testing"
 )
 
