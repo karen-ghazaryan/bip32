@@ -2,11 +2,14 @@ package bip32
 
 import (
 	"bytes"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha512"
 	"encoding/hex"
 	"errors"
+	"math/big"
 )
 
 const (
@@ -66,12 +69,12 @@ func (key *Key) NewChildKey(childIdx uint32) (*Key, error) {
 	hardenedChild := childIdx >= FirstHardenedChild
 	childIndexBytes := uint32Bytes(childIdx)
 
-	// Fail early if trying to create hardned child from public key
+	// Fail early if trying to create hardened child from public key
 	if !key.IsPrivate && hardenedChild {
-		return nil, errors.New("Can't create hardened child for public key")
+		return nil, errors.New("can't create hardened child for public key")
 	}
 
-	// Get intermediary to create key and chaincode from
+	// Get intermediary to create key and chainCode from
 	// Hardened children are based on the private key
 	// NonHardened children are based on the public key
 	var data []byte
@@ -163,6 +166,20 @@ func (key *Key) Serialize() []byte {
 	serializedKey := addChecksumToBytes(buffer.Bytes())
 
 	return serializedKey
+}
+
+// ToECDSA converts key to ecdsa public and private key pair
+func(key *Key) ToECDSA() (*ecdsa.PrivateKey, error) {
+	p := new(ecdsa.PrivateKey)
+	c := elliptic.P256()
+	p.PublicKey.Curve = c
+	p.D = new(big.Int).SetBytes(key.Key)
+	p.PublicKey.X, p.PublicKey.Y = c.ScalarBaseMult(key.Key)
+
+	if !c.IsOnCurve(p.PublicKey.X, p.PublicKey.Y) {
+		return nil, errors.New("invalid ecdsa key")
+	}
+	return p, nil
 }
 
 // Encode the Key in the standard Bitcoin base58 encoding
